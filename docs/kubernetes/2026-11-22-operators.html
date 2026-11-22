@@ -1,185 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kubernetes Operators</title>
+
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+
 <article>
 
-<h1>Kubernetes Operators</h1>
+    <nav>
+        <a href="../index.html">← Home</a>
+    </nav>
 
-<div class="meta">
-    Topic: Kubernetes
-    Last Updated: 2026-11-22
-    Status: Learning
-    Tags: operator, controller, crd, kubebuilder
-</div>
+    <h1>Kubernetes Operators</h1>
 
-<h2>One-Line Summary</h2>
+    <div class="meta">
+        <span>Kubernetes</span>
+        <span>Last Updated: 2026-11-22</span>
+        <span>Learning</span>
+    </div>
 
-<p>
-An Operator extends Kubernetes by introducing custom
-resources and a controller that automates operational tasks.
-</p>
+    <h2>One-Line Summary</h2>
 
-<h2>Why Do Operators Exist?</h2>
+    <p>
+        An Operator extends Kubernetes by introducing custom
+        resources and a controller that automates operational tasks.
+    </p>
 
-<p>
-Kubernetes knows how to manage Pods, Deployments,
-StatefulSets, Services, etc.
+    <h2>Why Does It Exist?</h2>
 
-It does not know how to manage a PostgreSQL cluster,
-Kafka cluster, or Redis cluster.
+    <p>
+        Kubernetes knows how to manage Pods, Deployments,
+        StatefulSets, Services, and other built-in resources.
+    </p>
 
-Operators teach Kubernetes how to manage these systems.
-</p>
+    <p>
+        It does not know how to manage a PostgreSQL cluster,
+        Kafka cluster, Redis cluster, or any domain-specific system.
+    </p>
 
-<h2>Problem Operators Solve</h2>
+    <p>
+        Operators teach Kubernetes how to manage these systems.
+    </p>
 
-<p>
-Without operators:
-</p>
+    <h2>Problem It Solves</h2>
 
-<ul>
-    <li>Manual backups</li>
-    <li>Manual failover</li>
-    <li>Manual scaling</li>
-    <li>Manual upgrades</li>
-</ul>
+    <p>Without operators:</p>
 
-<p>
-Operator automates these actions.
-</p>
+    <ul>
+        <li>Manual backups</li>
+        <li>Manual failover</li>
+        <li>Manual scaling</li>
+        <li>Manual upgrades</li>
+    </ul>
 
-<h2>Core Concepts</h2>
+    <p>
+        Operators automate these operational tasks.
+    </p>
 
-<h3>CRD (Custom Resource Definition)</h3>
+    <h2>Core Concepts</h2>
 
-<p>
-Introduces a new Kubernetes resource.
-</p>
+    <h3>CRD (Custom Resource Definition)</h3>
 
-<pre><code>
+    <p>
+        Introduces a new Kubernetes resource type.
+    </p>
+
+    <pre><code>
 kubectl get postgresql
-</code></pre>
+    </code></pre>
 
-<p>
-"postgresql" exists only because a CRD was installed.
-</p>
+    <p>
+        The "postgresql" resource exists because a CRD was installed.
+    </p>
 
-<h3>Custom Resource (CR)</h3>
+    <h3>Custom Resource (CR)</h3>
 
-<p>
-Actual instances of the CRD.
-</p>
+    <p>
+        Actual instances of a CRD.
+    </p>
 
-<pre><code>
+    <pre><code>
 apiVersion: db.example.com/v1
 kind: PostgreSQL
 metadata:
   name: primary
 spec:
   replicas: 3
-</code></pre>
+    </code></pre>
 
-<h3>Controller</h3>
+    <h3>Controller</h3>
 
-<p>
-Continuously compares desired state with actual state.
-</p>
+    <p>
+        Watches resources and continuously compares
+        desired state to actual state.
+    </p>
 
-<h2>Mental Model</h2>
+    <h2>Mental Model</h2>
 
-<p>
-Deployment Controller manages Pods.
+    <blockquote>
+        A Deployment Controller manages Pods.
+        <br><br>
+        An Operator is just another Controller that manages
+        a higher-level concept such as PostgreSQL, Kafka,
+        Elasticsearch, or MongoDB.
+    </blockquote>
 
-Operator is just another controller that manages
-higher-level resources.
+    <p>
+        Deployment → Pod
+        <br>
+        PostgreSQL Operator → PostgreSQL Cluster
+    </p>
 
-Deployment -> Pod
+    <h2>Architecture / Flow</h2>
 
-PostgreSQL Operator -> PostgreSQL Cluster
-</p>
+    <pre><code>
+Custom Resource Created
+            ↓
+      Operator Watches
+            ↓
+      Reconcile Loop
+            ↓
+ Desired State != Actual State
+            ↓
+     Make Necessary Changes
+            ↓
+      States Match
+    </code></pre>
 
-<h2>Reconcile Loop</h2>
+    <h2>Interview Answer (30 Seconds)</h2>
 
-<p>
-Operator pattern:
-</p>
+    <div class="tip">
+        This is the answer I'd give in an interview.
+    </div>
 
-<pre><code>
-while(true) {
-    actual = observeCluster()
+    <p>
+        A Kubernetes Operator extends Kubernetes using
+        Custom Resource Definitions (CRDs) and controllers.
+        The CRD introduces a new resource type while the
+        Operator watches those resources and continuously
+        reconciles actual cluster state with desired state.
+        Operators are commonly used to automate management
+        of complex stateful systems such as PostgreSQL,
+        Kafka, MongoDB, and Elasticsearch.
+    </p>
 
-    desired = readSpec()
+    <h2>Interview Questions</h2>
 
-    if(actual != desired) {
-        fixCluster()
-    }
-}
-</code></pre>
+    <details>
+        <summary>What is a Kubernetes Operator?</summary>
+        <p>
+            A controller that watches custom resources and
+            performs domain-specific automation.
+        </p>
+    </details>
 
-<p>
-Everything revolves around reconciliation.
-</p>
+    <details>
+        <summary>What is the difference between a CRD and an Operator?</summary>
+        <p>
+            A CRD defines a new Kubernetes resource type.
+            An Operator contains the logic that manages
+            instances of that resource.
+        </p>
+    </details>
 
-<h2>Interview Questions</h2>
+    <details>
+        <summary>Can a CRD exist without an Operator?</summary>
+        <p>
+            Yes. Kubernetes can store the resource,
+            but nothing will react to it.
+        </p>
+    </details>
 
-<h3>What is an Operator?</h3>
+    <details>
+        <summary>How is an Operator different from a Deployment?</summary>
+        <p>
+            A Deployment manages stateless workloads.
+            Operators typically manage complex stateful systems
+            and automation workflows.
+        </p>
+    </details>
 
-<p>
-A controller that watches custom resources and performs
-domain-specific automation.
-</p>
+    <details>
+        <summary>What is the reconciliation loop?</summary>
+        <p>
+            The reconciliation loop continuously compares
+            desired state and actual state and takes actions
+            until they match.
+        </p>
+    </details>
 
-<h3>Difference Between CRD and Operator?</h3>
+    <h2>Code Examples</h2>
 
-<p>
-CRD defines a new resource type.
+    <pre><code>
+kubectl get crd
 
-Operator contains business logic for managing that resource.
-</p>
+kubectl get postgresql
 
-<h3>Can I Have a CRD Without an Operator?</h3>
+kubectl describe postgresql primary
+    </code></pre>
 
-<p>
-Yes.
+    <h2>Tradeoffs</h2>
 
-The resource exists but nothing reacts to it.
-</p>
+    <table>
+        <tr>
+            <th>Pros</th>
+            <th>Cons</th>
+        </tr>
+        <tr>
+            <td>Automates repetitive operations</td>
+            <td>Extra complexity</td>
+        </tr>
+        <tr>
+            <td>Encapsulates operational knowledge</td>
+            <td>Learning curve</td>
+        </tr>
+        <tr>
+            <td>Improves reliability</td>
+            <td>Harder debugging</td>
+        </tr>
+    </table>
 
-<h3>How Is an Operator Different From a Deployment?</h3>
+    <h2>Common Mistakes</h2>
 
-<p>
-Deployment manages stateless applications.
+    <ul>
+        <li>Thinking CRD and Operator are the same thing.</li>
+        <li>Assuming Operators execute only once.</li>
+        <li>Ignoring the reconciliation loop.</li>
+        <li>Treating Operators as scripts instead of controllers.</li>
+    </ul>
 
-Operators usually manage stateful or complex systems.
-</p>
+    <h2>Blog Learnings</h2>
 
-<h2>Personal Understanding</h2>
+    <ul>
+        <li>Operator = CRD + Controller Logic.</li>
+        <li>Everything revolves around reconciliation.</li>
+        <li>Most Operators manage stateful workloads.</li>
+    </ul>
 
-<p>
-Operator = Deployment Controller, but for my own resource.
+    <h2>Personal Understanding</h2>
 
-Kubernetes provides generic controllers.
-Operators let us write custom controllers.
-</p>
+    <p>
+        Operator = Deployment Controller, but for my own
+        resource type.
+    </p>
 
-<h2>Real-World Operators</h2>
+    <p>
+        Kubernetes ships with generic controllers.
+        Operators allow developers to write custom controllers
+        for domain-specific systems.
+    </p>
 
-<ul>
-    <li>Postgres Operator</li>
-    <li>Kafka Operator</li>
-    <li>Prometheus Operator</li>
-    <li>MongoDB Operator</li>
-    <li>ElasticSearch Operator</li>
-</ul>
+    <h2>Personal Experience</h2>
 
-<h2>Personal Experience</h2>
+    <ul>
+        <li>Project:</li>
+        <li>Installed Operator:</li>
+        <li>Problem:</li>
+        <li>Root Cause:</li>
+        <li>Fix:</li>
+        <li>Lesson Learned:</li>
+    </ul>
 
-<p>
-(Leave empty until you use one.)
-</p>
+    <h2>Real-World Operators</h2>
 
-<ul>
-    <li>Installed Operator:</li>
-    <li>Problem Faced:</li>
-    <li>Debugging Steps:</li>
-    <li>Key Learning:</li>
-</ul>
+    <ul>
+        <li>Postgres Operator</li>
+        <li>Kafka Operator</li>
+        <li>Prometheus Operator</li>
+        <li>MongoDB Operator</li>
+        <li>ElasticSearch Operator</li>
+    </ul>
 
-<h2>
+    <h2>Related Topics</h2>
+
+    <ul>
+        <li>Controllers</li>
+        <li>Control Loops</li>
+        <li>CRDs</li>
+        <li>Kubebuilder</li>
+        <li>client-go</li>
+        <li>StatefulSets</li>
+    </ul>
+
+    <h2>Revision Log</h2>
+
+    <ul>
+        <li>2026-11-22 - Learned CRD vs Operator distinction.</li>
+        <li>2026-11-22 - Added reconciliation loop notes.</li>
+    </ul>
+
+</article>
+
+</body>
+</html>
